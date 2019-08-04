@@ -9,7 +9,9 @@ module.exports = {
                 'views':'@/views'
             }
         }
-    }
+    },
+
+    lintOnSave: false
 }
 
 // const path = require('path')

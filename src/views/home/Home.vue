@@ -6,63 +6,22 @@
         <h6 slot="center">购物街</h6>
       </nav-bar>
     </div>
-    <!-- 轮播图组件 -->
-    <home-swiper :banners="banners" />
+    <scroll class="content"
+            ref="scroll"
+            :probe-type="3"
+            @scroll="contentScroll"
+            :pull-up-load="true"
+            @pullingUp="loadMore">
+      <!-- 轮播图组件 -->
+      <home-swiper :banners="banners" />
 
-    <recommend-view :recommends="recommends" />
-    <feature-view />
+      <recommend-view :recommends="recommends" />
+      <feature-view />
 
-    <tab-control :titles="titles" class="tab-control"/>
-
-    <ul>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>111111</li>
-      <li>111111</li>
-      <li>t11111</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>111111</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>111111</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>111111</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>111111</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>111111</li>
-      <li>tianchong</li>
-      <li>tianchong</li>
-      <li>111111</li>
-    </ul>
-
+      <tab-control :titles="titles" class="tab-control" @clickItem="clickItem"/>
+      <goods-list :goods="showGoods"/>
+    </scroll>
+    <back-top @click.native="backClick" v-show="isShowBackTop"/>
   </div>
 </template>
 
@@ -72,8 +31,9 @@ import TabControl from "components/common/TabControl/TabControl"
 import HomeSwiper from "./childComps/HomeSwiper";
 import RecommendView from "./childComps/RecommendView";
 import FeatureView from "./childComps/FeatureView";
-
-
+import GoodsList from "components/content/goods/GoodsList"
+import Scroll from 'components/common/scroll/Scroll'
+import BackTop from 'components/content/backTop/BackTop'
 import { getHomeMultiData, getHomeGoods } from "network/home";
 export default {
   name: "Home",
@@ -82,7 +42,10 @@ export default {
     TabControl,
     HomeSwiper,
     RecommendView,
-    FeatureView
+    FeatureView,
+    GoodsList,
+    Scroll,
+    BackTop
   },
   data() {
     return {
@@ -93,7 +56,9 @@ export default {
         'pop':{page: 0, list:[]},
         'new':{page: 0, list:[]},
         'sell':{page: 0, list:[]}
-      }
+      },
+      currentType:'pop',
+      isShowBackTop: false
     };
   },
   created() {
@@ -103,7 +68,34 @@ export default {
     this.getHomeGoods('new');
     this.getHomeGoods('sell');
   },
+  computed: {
+    showGoods(){
+      return this.goods[this.currentType].list;
+    }
+  },
   methods:{
+    backClick() {
+        this.$refs.scroll.scrollTo(0, 0)
+    },
+    contentScroll(position) {
+        this.isShowBackTop = (-position.y) > 1000
+    },
+    loadMore() {
+        this.getHomeGoods(this.currentType)
+    },
+    clickItem(index) {
+        switch(index) {
+          case 0:
+            this.currentType = 'pop';
+            break;
+          case 1:
+            this.currentType = 'new';
+            break;
+          case 2:
+            this.currentType = 'sell';
+            break;
+        }
+    },
     getHomeMultiData() {
       getHomeMultiData().then(res => {
         // console.log(res);
@@ -117,6 +109,8 @@ export default {
         //console.log(res);
         this.goods[type].list.push(...res.data.list);
         this.goods[type].page += 1;
+
+        this.$refs.scroll.finishPullUp()
       })
     }
   }
@@ -142,5 +136,16 @@ export default {
 .tab-control {
   position: sticky;
   top: 44px;
+  background-color: white;
+  z-index: 9;
+}
+
+.content {
+    overflow: hidden;
+    position: absolute;
+    top: 44px;
+    bottom: 49px;
+    left: 0;
+    right: 0;
 }
 </style>

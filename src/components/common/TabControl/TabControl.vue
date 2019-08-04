@@ -28,6 +28,7 @@ export default {
     methods:{
         itemClick(index){
             this.currureIndex = index;
+            this.$emit("clickItem", index);
         }
     }
 }
