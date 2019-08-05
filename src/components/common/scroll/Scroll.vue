@@ -16,10 +16,10 @@
         type: Number,
         default: 0
       },
-      pullUpLoad: {
-        type: Boolean,
-        default: false
-      }
+      // pullUpLoad: {
+      //   type: Boolean,
+      //   default: false
+      // }
     },
     data() {
       return {
@@ -42,9 +42,9 @@
       })
 
       // 3.监听上拉事件
-      this.scroll.on('pullingUp', () => {
-        this.$emit('pullingUp')
-      })
+      // this.scroll.on('pullingUp', () => {
+      //   this.$emit('pullingUp')
+      // })
     },
     methods: {
       scrollTo(x, y, time=300) {
@@ -52,6 +52,9 @@
       },
       finishPullUp() {
         this.scroll.finishPullUp()
+      },
+      refresh() {
+        this.scroll.refresh();
       }
     }
   }

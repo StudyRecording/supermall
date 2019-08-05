@@ -10,8 +10,7 @@
             ref="scroll"
             :probe-type="3"
             @scroll="contentScroll"
-            :pull-up-load="true"
-            @pullingUp="loadMore">
+            :pull-up-load="true">  <!--  @pullingUp="loadMore" -->
       <!-- 轮播图组件 -->
       <home-swiper :banners="banners" />
 
@@ -67,6 +66,11 @@ export default {
     this.getHomeGoods('pop');
     this.getHomeGoods('new');
     this.getHomeGoods('sell');
+
+    this.$bus.$on("itemImageLoad", () => {
+      // console.log('-----------------');
+      this.$refs.scroll.refresh();
+    })
   },
   computed: {
     showGoods(){
@@ -80,9 +84,9 @@ export default {
     contentScroll(position) {
         this.isShowBackTop = (-position.y) > 1000
     },
-    loadMore() {
-        this.getHomeGoods(this.currentType)
-    },
+    // loadMore() {
+    //     this.getHomeGoods(this.currentType)
+    // },
     clickItem(index) {
         switch(index) {
           case 0:
@@ -110,7 +114,7 @@ export default {
         this.goods[type].list.push(...res.data.list);
         this.goods[type].page += 1;
 
-        this.$refs.scroll.finishPullUp()
+        // this.$refs.scroll.finishPullUp()
       })
     }
   }
