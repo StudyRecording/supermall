@@ -6,18 +6,21 @@
         <h6 slot="center">购物街</h6>
       </nav-bar>
     </div>
+    <tab-control :titles="titles" class="tab-control" @clickItem="clickItem" ref="tabControl1" v-show="isTabFixed" />
+
     <scroll class="content"
             ref="scroll"
             :probe-type="3"
             @scroll="contentScroll"
-            :pull-up-load="true">  <!--  @pullingUp="loadMore" -->
+            :pull-up-load="true" 
+            @pullingUp="loadMore">
       <!-- 轮播图组件 -->
-      <home-swiper :banners="banners" />
+      <home-swiper :banners="banners" @swiperImageLoad="swiperImageLoad"/>
 
       <recommend-view :recommends="recommends" />
       <feature-view />
 
-      <tab-control :titles="titles" class="tab-control" @clickItem="clickItem"/>
+      <tab-control :titles="titles" @clickItem="clickItem" ref="tabControl2"/>
       <goods-list :goods="showGoods"/>
     </scroll>
     <back-top @click.native="backClick" v-show="isShowBackTop"/>
@@ -34,6 +37,7 @@ import GoodsList from "components/content/goods/GoodsList"
 import Scroll from 'components/common/scroll/Scroll'
 import BackTop from 'components/content/backTop/BackTop'
 import { getHomeMultiData, getHomeGoods } from "network/home";
+import { debounce } from "common/util"
 export default {
   name: "Home",
   components: {
@@ -57,7 +61,9 @@ export default {
         'sell':{page: 0, list:[]}
       },
       currentType:'pop',
-      isShowBackTop: false
+      isShowBackTop: false,
+      tabOffsetTop: 0,
+      isTabFixed: false
     };
   },
   created() {
@@ -66,10 +72,13 @@ export default {
     this.getHomeGoods('pop');
     this.getHomeGoods('new');
     this.getHomeGoods('sell');
-
+  },
+  mounted() {
+    const refresh = debounce(this.$refs.scroll.refresh, 50);
     this.$bus.$on("itemImageLoad", () => {
       // console.log('-----------------');
-      this.$refs.scroll.refresh();
+      //this.$refs.scroll.refresh();
+      refresh();
     })
   },
   computed: {
@@ -82,11 +91,15 @@ export default {
         this.$refs.scroll.scrollTo(0, 0)
     },
     contentScroll(position) {
+        //显示top back
         this.isShowBackTop = (-position.y) > 1000
+
+        //判断tabContol是否吸顶
+        this.isTabFixed = (-position.y) > this.tabOffsetTop;
     },
-    // loadMore() {
-    //     this.getHomeGoods(this.currentType)
-    // },
+    loadMore() {
+      this.getHomeGoods(this.currentType);
+    },
     clickItem(index) {
         switch(index) {
           case 0:
@@ -99,6 +112,8 @@ export default {
             this.currentType = 'sell';
             break;
         }
+        this.$refs.tabControl2.currureIndex = index;
+        this.$refs.tabControl1.currureIndex = index;
     },
     getHomeMultiData() {
       getHomeMultiData().then(res => {
@@ -114,8 +129,12 @@ export default {
         this.goods[type].list.push(...res.data.list);
         this.goods[type].page += 1;
 
-        // this.$refs.scroll.finishPullUp()
+        this.$refs.scroll.finishPullUp();
       })
+    },
+    swiperImageLoad() {
+      //console.log(this.$refs.tabControl.$el.offsetTop);
+      this.tabOffsetTop = this.$refs.tabControl2.$el.offsetTop;
     }
   }
 };
@@ -123,23 +142,25 @@ export default {
 
 <style scoped>
 #home {
-  padding-top: 44px;
-  padding-bottom: 49px;
+  /* padding-top: 44px; */
+  /* padding-bottom: 49px; */
 }
 
 .home-nav {
   background-color: var(--color-tint);
   color: white;
-  position: fixed;
+  /* position: fixed;
   left: 0;
   right: 0;
   top: 0;
-  z-index: 9;
+  z-index: 9; */
 }
 
 .tab-control {
-  position: sticky;
-  top: 44px;
+  position: relative;
+  top: 0;
+  left: 0;
+  right: 0;
   background-color: white;
   z-index: 9;
 }
