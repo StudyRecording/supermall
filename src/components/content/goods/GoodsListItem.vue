@@ -28,7 +28,8 @@
         // 1.获取iid
         const iid = this.goodsItem.iid;
         // 2.跳转到详情页面
-        this.$router.push({path: '/detail', query: {iid}})
+        //this.$router.push({path: '/detail', query: {iid}})
+        this.$router.push('/detail/'+ iid)
       },
       imgLoad() {
         this.$bus.$emit("itemImageLoad");
