@@ -149,10 +149,10 @@ export default {
 </script>
 
 <style scoped>
-#home {
-  /* padding-top: 44px; */
-  /* padding-bottom: 49px; */
-}
+/* #home {
+  padding-top: 44px; 
+  padding-bottom: 49px;
+} */
 
 .home-nav {
   background-color: var(--color-tint);
